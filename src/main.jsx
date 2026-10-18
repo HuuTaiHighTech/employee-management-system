@@ -8,6 +8,7 @@ import EditProduct from "./pages/EditProduct";
 createRoot(document.getElementById("root")).render(
   <BrowserRouter>
     <Routes>
+    <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
       <Route path="admin">
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="products" element={<ProductList />} />
