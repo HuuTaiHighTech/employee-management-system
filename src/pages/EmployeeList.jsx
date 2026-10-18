@@ -1,6 +1,6 @@
 import React from 'react'
 
-const ProductList = () => {
+const EmployeeList = () => {
   return (
     <div>
       <h1>Đây là trang danh sách sản phẩm</h1>
@@ -9,4 +9,4 @@ const ProductList = () => {
   )
 }
 
-export default ProductList
+export default EmployeeList

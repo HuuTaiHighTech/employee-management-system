@@ -1,6 +1,6 @@
 import React from 'react'
 
-const CreateProduct = () => {
+const CreateEmployee = () => {
   return (
     <div>
       <h1>Đây là trang tạo product</h1>
@@ -9,4 +9,4 @@ const CreateProduct = () => {
   )
 }
 
-export default CreateProduct
+export default CreateEmployee

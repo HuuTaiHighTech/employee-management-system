@@ -1,7 +1,7 @@
 import React from 'react'
 import { useParams } from 'react-router-dom';
 
-const EditProduct = () => {
+const EditEmployee = () => {
   return (
     <div>
       <h1>Đây là trang edit</h1>
@@ -10,4 +10,4 @@ const EditProduct = () => {
   )
 }
 
-export default EditProduct
+export default EditEmployee
