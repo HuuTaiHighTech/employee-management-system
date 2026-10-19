@@ -7,10 +7,10 @@ const AdminTemplate = () => {
     <div>
       <div className='container'>
       <div className='row'>
-        <div className='col-4'>
+        <div className='col-3'>
         <Sidebar/>
         </div>
-        <div className='col-8'>
+        <div className='col-9'>
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
             <Outlet/>
         </main>

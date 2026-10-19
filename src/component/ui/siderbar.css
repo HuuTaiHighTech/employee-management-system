@@ -1,0 +1,13 @@
+/* Smooth hover and active state transitions */
+.nav-item .nav-link {
+    transition: all 0.2s;
+}
+
+.nav-link.active {
+  color: #fff;
+  background-color: #dc3545;
+}
+
+.nav-item .nav-link:hover {
+    border: 1px solid #dc3545;
+}
