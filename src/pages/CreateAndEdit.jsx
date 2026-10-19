@@ -2,8 +2,13 @@ import axios from 'axios'
 import { useFormik } from 'formik'
 import { useCallback, useEffect } from 'react'
 import { Link, useMatch, useNavigate } from 'react-router-dom'
+import CustomSelect from '../component/ui/CustomSelect'
 
 const CreateAndEdit = () => {
+  const positionOptions = [
+    { value: 'DEV', label: 'DEV' },
+    { value: 'Marketing', label: 'Marketing' },
+  ]
   const match = useMatch('/admin/employee/:id')
   const isEdit = !!match
   console.log('isEdit', isEdit)
@@ -13,7 +18,7 @@ const CreateAndEdit = () => {
     initialValues: {
       "maNhanVien": 0,
       "tenNhanVien": "string",
-      "chucVu": "string",
+      "chucVu": "",
       "heSoChucVu": 0,
       "luongCoBan": 0,
       "soGioLamTrongThang": 0
@@ -123,15 +128,13 @@ const CreateAndEdit = () => {
                 <label htmlFor="chucVu" className="form-label fw-semibold">
                   Chức vụ
                 </label>
-                <input
-                  type="text"
-                  className="form-control"
-                  id="chucVu"
-                  name="chucVu"
-                  placeholder="Ví dụ: DEV, Marketing"
+                <CustomSelect
+                  options={positionOptions}
                   value={employeeInfo.values.chucVu}
-                  onChange={employeeInfo.handleChange}
-                  required
+                  onValueChange={(value) =>
+                    employeeInfo.setFieldValue('chucVu', value)
+                  }
+                  placeholder="Chọn chức vụ"
                 />
               </div>
 

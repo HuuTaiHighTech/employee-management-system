@@ -7,13 +7,14 @@ import { Link } from 'react-router-dom'
 
 const EmployeeList = () => {
   const [arrEmployees, setArrEmployees] = useState([])
-
+  const [isDeleting, setIsDeleting] = useState(false)
+  
   const getAllEmployeeAPI = async () => {
     try {
       const res = await axios.get(
         'https://apitraining.cybersoft.edu.vn/api/QuanLyNhanVienApi/LayDanhSachNhanVien',
       )
-      setArrEmployees(res.data) 
+      setArrEmployees(res.data)
     } catch (error) {
       throw new Error('Không thể tải danh sách nhân viên từ API.', { cause: error })
     }
@@ -22,6 +23,26 @@ const EmployeeList = () => {
   useEffect(() => {
     getAllEmployeeAPI()
   }, [])
+
+  const handleDeleteEmployee = async (maNhanVien) => {
+    setIsDeleting(true)
+    try {
+      await axios.delete(
+        `https://svcy.myclass.vn/api/QuanLyNhanVienApi/XoaNhanVien?maSinhVien=${encodeURIComponent(maNhanVien)}`,
+      )
+      setArrEmployees((employees) =>
+        employees.filter((employee) => employee.maNhanVien !== maNhanVien),
+      )
+      alert('Đã xóa nhân viên thành công!')
+    } catch (error) {
+      alert(
+        'Xóa thất bại: ' +
+        (error.response?.data?.message || error.message),
+      )
+    } finally {
+      setIsDeleting(false)
+    }
+  }
 
 
 
@@ -118,7 +139,8 @@ const EmployeeList = () => {
                           className="btn btn-sm btn-light text-danger rounded-circle p-2"
                           title="Xóa nhân viên"
                           aria-label={`Xóa ${employee.tenNhanVien}`}
-                          
+                          onClick={() => handleDeleteEmployee(employee.maNhanVien)}
+                          disabled={isDeleting}
                         >
                           <svg
                             width="16"
