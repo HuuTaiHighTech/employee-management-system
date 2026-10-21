@@ -47,7 +47,7 @@ const EmployeeList = () => {
 
 
   return (
-    <div className="container-fluid py-4 px-3 px-md-4 bg-light min-vh-100">
+    <div className="">
       <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
           <h3 className="fw-bold text-dark mb-1">Quản lý nhân viên</h3>

@@ -17,32 +17,89 @@ const CreateAndEdit = () => {
     enableReinitialize: isEdit,
     initialValues: {
       "maNhanVien": 0,
-      "tenNhanVien": "string",
+      "tenNhanVien": "",
       "chucVu": "",
       "heSoChucVu": 0,
       "luongCoBan": 0,
       "soGioLamTrongThang": 0
     },
-    onSubmit: async (values) => {
-      // values dữ liệu input từ form
-      console.log(values)
+    validate: (values) => {
+      const errors = {};
 
-      let urlAPI = 'https://apitraining.cybersoft.edu.vn/api/QuanLyNhanVienApi/ThemNhanVien';
-      let method = 'post'
+      if (!String(values.maNhanVien).trim()) {
+        errors.maNhanVien = "Vui lòng nhập mã nhân viên";
+      }
+
+      if (!String(values.tenNhanVien ?? "").trim()) {
+        errors.tenNhanVien = "Vui lòng nhập họ và tên";
+      }
+
+      if (!values.chucVu) {
+        errors.chucVu = "Vui lòng chọn chức vụ";
+      }
+
+      if (!Number.isFinite(Number(values.heSoChucVu)) || Number(values.heSoChucVu) <= 0) {
+        errors.heSoChucVu = "Hệ số chức vụ phải lớn hơn 0";
+      }
+
+      if (!Number.isFinite(Number(values.luongCoBan)) || Number(values.luongCoBan) <= 0) {
+        errors.luongCoBan = "Lương cơ bản phải lớn hơn 0";
+      }
+
+      if (!Number.isFinite(Number(values.soGioLamTrongThang)) || Number(values.soGioLamTrongThang) <= 0) {
+        errors.soGioLamTrongThang =
+          "Số giờ làm trong tháng phải lớn hơn 0";
+      }
+
+      return errors;
+    },
+    onSubmit: async (values, { setFieldError }) => {
+      const baseUrl = 'https://apitraining.cybersoft.edu.vn/api/QuanLyNhanVienApi'
+      let urlAPI = ''
+      let method = ''
+      
+
+      // formik lưu lại giá trị cuối
+      console.log('Giá trị cuối cùng:', values)
+
       if (isEdit) {
         //nếu là cập nhật thì đổi urlAPI và method tương ứng với update
-        urlAPI = 'https://apitraining.cybersoft.edu.vn/api/QuanLyNhanVienApi/CapNhatThongTinNhanVien?maNhanVien=${match?.params?.id}'
+        urlAPI = `${baseUrl}/CapNhatThongTinNhanVien?maNhanVien=${match?.params?.id}`
         method = 'put'
       }
 
-      //gọi API thêm sản phẩm
+      if (!isEdit) {
+        urlAPI = `${baseUrl}/ThemNhanVien`;
+        method = 'post'
+        try {
+          const employeesRes = await axios.get(
+            'https://apitraining.cybersoft.edu.vn/api/QuanLyNhanVienApi/LayDanhSachNhanVien',
+          )
+          const isDuplicate = employeesRes.data.some(
+            (employee) =>
+              String(employee.maNhanVien).trim() ===
+              String(values.maNhanVien).trim(),
+          )
+
+          if (isDuplicate) {
+            setFieldError('maNhanVien', 'Mã nhân viên đã tồn tại')
+            return
+          }
+        } catch (error) {
+          console.log(error)
+          alert('Không thể kiểm tra mã nhân viên. Vui lòng thử lại.')
+          return
+        }
+      }
+
+      //gọi API thêm sản phẩm hoặc update
       try {
         // post(urlAPI , input)
         const res = await axios[method](urlAPI, values)
         console.log(res.data)
         //nếu thành công
         alert('Lưu dữ liệu thành công')
-        //chuyển hướng về tranh danh sách 
+        //chuyển hướng về tranh danh sách  
         navigate('/admin/employees')
 
       } catch (error) {
@@ -70,6 +127,11 @@ const CreateAndEdit = () => {
       getEmployeeDetailAPI()
     }
   }, [match?.params?.id])
+  const handleInputChange = (event) => {
+    employeeInfo.handleChange(event)
+    // Hiển thị giá trị nhập vào input 
+    console.log(event.target.name, event.target.value)
+  }
   return (
     <div className="container-fluid py-4 px-3 px-md-4 bg-light min-vh-100">
       <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
@@ -98,14 +160,20 @@ const CreateAndEdit = () => {
                 </label>
                 <input
                   type="text"
-                  className="form-control"
+                  className={`form-control${employeeInfo.touched.maNhanVien && employeeInfo.errors.maNhanVien ? ' is-invalid' : ''}`}
                   id="maNhanVien"
                   name="maNhanVien"
                   placeholder="Nhập mã nhân viên"
                   disabled={isEdit}
                   value={employeeInfo.values.maNhanVien}
-                  onChange={employeeInfo.handleChange}
+                  onChange={handleInputChange}
+                  onBlur={employeeInfo.handleBlur}
                 />
+                {employeeInfo.touched.maNhanVien && employeeInfo.errors.maNhanVien && (
+                  <div className="invalid-feedback d-block">
+                    {employeeInfo.errors.maNhanVien}
+                  </div>
+                )}
               </div>
 
               <div className="col-md-6">
@@ -120,8 +188,11 @@ const CreateAndEdit = () => {
                   placeholder="Nhập họ và tên"
                   value={employeeInfo.values.tenNhanVien}
                   onChange={employeeInfo.handleChange}
-                  required
+                  onBlur={employeeInfo.handleBlur}
                 />
+                {employeeInfo.touched.tenNhanVien && employeeInfo.errors.tenNhanVien && (
+                  <p className="text-danger mb-0">{employeeInfo.errors.tenNhanVien}</p>
+                )}
               </div>
 
               <div className="col-md-6">
@@ -131,11 +202,15 @@ const CreateAndEdit = () => {
                 <CustomSelect
                   options={positionOptions}
                   value={employeeInfo.values.chucVu}
-                  onValueChange={(value) =>
+                  onValueChange={(value) => {
                     employeeInfo.setFieldValue('chucVu', value)
-                  }
+                    employeeInfo.setFieldTouched('chucVu', true)
+                  }}
                   placeholder="Chọn chức vụ"
                 />
+                {employeeInfo.touched.chucVu && employeeInfo.errors.chucVu && (
+                  <p className="text-danger mb-0">{employeeInfo.errors.chucVu}</p>
+                )}
               </div>
 
               <div className="col-md-6">
@@ -152,8 +227,11 @@ const CreateAndEdit = () => {
                   step="0.1"
                   value={employeeInfo.values.heSoChucVu}
                   onChange={employeeInfo.handleChange}
-                  required
+                  onBlur={employeeInfo.handleBlur}
                 />
+                {employeeInfo.touched.heSoChucVu && employeeInfo.errors.heSoChucVu && (
+                  <p className="text-danger mb-0">{employeeInfo.errors.heSoChucVu}</p>
+                )}
               </div>
 
               <div className="col-md-6">
@@ -170,10 +248,13 @@ const CreateAndEdit = () => {
                     min="0"
                     value={employeeInfo.values.luongCoBan}
                     onChange={employeeInfo.handleChange}
-                    required
+                    onBlur={employeeInfo.handleBlur}
                   />
                   <span className="input-group-text">₫</span>
                 </div>
+                {employeeInfo.touched.luongCoBan && employeeInfo.errors.luongCoBan && (
+                  <p className="text-danger mb-0">{employeeInfo.errors.luongCoBan}</p>
+                )}
               </div>
 
               <div className="col-md-6">
@@ -193,10 +274,13 @@ const CreateAndEdit = () => {
                     min="0"
                     value={employeeInfo.values.soGioLamTrongThang}
                     onChange={employeeInfo.handleChange}
-                    required
+                    onBlur={employeeInfo.handleBlur}
                   />
                   <span className="input-group-text">giờ</span>
                 </div>
+                {employeeInfo.touched.soGioLamTrongThang && employeeInfo.errors.soGioLamTrongThang && (
+                  <p className="text-danger mb-0">{employeeInfo.errors.soGioLamTrongThang}</p>
+                )}
               </div>
             </div>
 
