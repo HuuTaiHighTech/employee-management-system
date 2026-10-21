@@ -8,6 +8,17 @@ const CreateAndEdit = () => {
   const positionOptions = [
     { value: 'DEV', label: 'DEV' },
     { value: 'Marketing', label: 'Marketing' },
+    { value: 'Khác', label: 'Khác' }
+  ]
+  const salaryBasicOptions = [
+    {
+      value: 4960000,
+      label: `${(4960000).toLocaleString('vi-VN')} ₫`,
+    },
+    {
+      value: 4420000,
+      label: `${(4420000).toLocaleString('vi-VN')} ₫`,
+    },
   ]
   const match = useMatch('/admin/employee/:id')
   const isEdit = !!match
@@ -16,12 +27,12 @@ const CreateAndEdit = () => {
   const employeeInfo = useFormik({
     enableReinitialize: isEdit,
     initialValues: {
-      "maNhanVien": 0,
+      "maNhanVien": "",
       "tenNhanVien": "",
       "chucVu": "",
-      "heSoChucVu": 0,
-      "luongCoBan": 0,
-      "soGioLamTrongThang": 0
+      "heSoChucVu": "",
+      "luongCoBan": "",
+      "soGioLamTrongThang": ""
     },
     validate: (values) => {
       const errors = {};
@@ -30,16 +41,17 @@ const CreateAndEdit = () => {
         errors.maNhanVien = "Vui lòng nhập mã nhân viên";
       }
 
-      if (!String(values.tenNhanVien ?? "").trim()) {
-        errors.tenNhanVien = "Vui lòng nhập họ và tên";
+      const fullName = String(values.tenNhanVien ?? "").trim()
+      if (fullName.split(/\s+/).filter(Boolean).length < 2) {
+        errors.tenNhanVien = "Vui lòng nhập họ và tên đầy đủ (ít nhất 2 từ)";
       }
 
       if (!values.chucVu) {
         errors.chucVu = "Vui lòng chọn chức vụ";
       }
 
-      if (!Number.isFinite(Number(values.heSoChucVu)) || Number(values.heSoChucVu) <= 0) {
-        errors.heSoChucVu = "Hệ số chức vụ phải lớn hơn 0";
+      if (!Number.isInteger(Number(values.heSoChucVu)) || Number(values.heSoChucVu) <= 0) {
+        errors.heSoChucVu = "Hệ số chức vụ phải là số nguyên lớn hơn 0";
       }
 
       if (!Number.isFinite(Number(values.luongCoBan)) || Number(values.luongCoBan) <= 0) {
@@ -94,8 +106,13 @@ const CreateAndEdit = () => {
 
       //gọi API thêm sản phẩm hoặc update
       try {
-        // post(urlAPI , input)
-        const res = await axios[method](urlAPI, values)
+        const payload = {
+          ...values,
+          maNhanVien: Number(values.maNhanVien),
+          heSoChucVu: Number(values.heSoChucVu),
+        }
+        console.log('Payload gửi API:', payload)
+        const res = await axios[method](urlAPI, payload)
         console.log(res.data)
         //nếu thành công
         alert('Lưu dữ liệu thành công')
@@ -163,7 +180,7 @@ const CreateAndEdit = () => {
                   className={`form-control${employeeInfo.touched.maNhanVien && employeeInfo.errors.maNhanVien ? ' is-invalid' : ''}`}
                   id="maNhanVien"
                   name="maNhanVien"
-                  placeholder="Nhập mã nhân viên"
+                  placeholder="113*"
                   disabled={isEdit}
                   value={employeeInfo.values.maNhanVien}
                   onChange={handleInputChange}
@@ -185,7 +202,7 @@ const CreateAndEdit = () => {
                   className="form-control"
                   id="tenNhanVien"
                   name="tenNhanVien"
-                  placeholder="Nhập họ và tên"
+                  placeholder="Nguyễn Văn A"
                   value={employeeInfo.values.tenNhanVien}
                   onChange={employeeInfo.handleChange}
                   onBlur={employeeInfo.handleBlur}
@@ -224,7 +241,7 @@ const CreateAndEdit = () => {
                   name="heSoChucVu"
                   placeholder="Nhập hệ số chức vụ"
                   min="0"
-                  step="0.1"
+                  step="1"
                   value={employeeInfo.values.heSoChucVu}
                   onChange={employeeInfo.handleChange}
                   onBlur={employeeInfo.handleBlur}
@@ -238,20 +255,26 @@ const CreateAndEdit = () => {
                 <label htmlFor="luongCoBan" className="form-label fw-semibold">
                   Lương cơ bản
                 </label>
-                <div className="input-group">
-                  <input
-                    type="number"
-                    className="form-control"
-                    id="luongCoBan"
-                    name="luongCoBan"
-                    placeholder="Nhập lương cơ bản"
-                    min="0"
-                    value={employeeInfo.values.luongCoBan}
-                    onChange={employeeInfo.handleChange}
-                    onBlur={employeeInfo.handleBlur}
-                  />
-                  <span className="input-group-text">₫</span>
-                </div>
+                <select
+                  className="form-select"
+                  id="luongCoBan"
+                  name="luongCoBan"
+                  value={employeeInfo.values.luongCoBan}
+                  onChange={(event) =>
+                    employeeInfo.setFieldValue(
+                      'luongCoBan',
+                      Number(event.target.value),
+                    )
+                  }
+                  onBlur={employeeInfo.handleBlur}
+                >
+                  <option value="">Chọn lương cơ bản</option>
+                  {salaryBasicOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
                 {employeeInfo.touched.luongCoBan && employeeInfo.errors.luongCoBan && (
                   <p className="text-danger mb-0">{employeeInfo.errors.luongCoBan}</p>
                 )}

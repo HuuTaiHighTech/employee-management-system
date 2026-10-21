@@ -4,7 +4,6 @@ import { Outlet } from 'react-router-dom'
 
 const AdminTemplate = () => {
   return (
-    <div>
       <div className='container'>
         <div className='row'>
           <div className='col-3'>
@@ -16,8 +15,6 @@ const AdminTemplate = () => {
             </main>
           </div>
         </div>
-
-      </div>
     </div>
   )
 }
