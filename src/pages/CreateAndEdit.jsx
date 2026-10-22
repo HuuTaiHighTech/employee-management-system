@@ -149,6 +149,8 @@ const CreateAndEdit = () => {
     // Hiển thị giá trị nhập vào input 
     console.log(event.target.name, event.target.value)
   }
+  const showValidationErrors = employeeInfo.submitCount > 0
+
   return (
     <div className="container-fluid py-4 px-3 px-md-4 bg-light min-vh-100">
       <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
@@ -177,7 +179,7 @@ const CreateAndEdit = () => {
                 </label>
                 <input
                   type="text"
-                  className={`form-control${employeeInfo.touched.maNhanVien && employeeInfo.errors.maNhanVien ? ' is-invalid' : ''}`}
+                  className={`form-control${showValidationErrors && employeeInfo.errors.maNhanVien ? ' is-invalid' : ''}`}
                   id="maNhanVien"
                   name="maNhanVien"
                   placeholder="113*"
@@ -186,7 +188,7 @@ const CreateAndEdit = () => {
                   onChange={handleInputChange}
                   onBlur={employeeInfo.handleBlur}
                 />
-                {employeeInfo.touched.maNhanVien && employeeInfo.errors.maNhanVien && (
+                {showValidationErrors && employeeInfo.errors.maNhanVien && (
                   <div className="invalid-feedback d-block">
                     {employeeInfo.errors.maNhanVien}
                   </div>
@@ -207,7 +209,7 @@ const CreateAndEdit = () => {
                   onChange={employeeInfo.handleChange}
                   onBlur={employeeInfo.handleBlur}
                 />
-                {employeeInfo.touched.tenNhanVien && employeeInfo.errors.tenNhanVien && (
+                {showValidationErrors && employeeInfo.errors.tenNhanVien && (
                   <p className="text-danger mb-0">{employeeInfo.errors.tenNhanVien}</p>
                 )}
               </div>
@@ -225,7 +227,7 @@ const CreateAndEdit = () => {
                   }}
                   placeholder="Chọn chức vụ"
                 />
-                {employeeInfo.touched.chucVu && employeeInfo.errors.chucVu && (
+                {showValidationErrors && employeeInfo.errors.chucVu && (
                   <p className="text-danger mb-0">{employeeInfo.errors.chucVu}</p>
                 )}
               </div>
@@ -246,7 +248,7 @@ const CreateAndEdit = () => {
                   onChange={employeeInfo.handleChange}
                   onBlur={employeeInfo.handleBlur}
                 />
-                {employeeInfo.touched.heSoChucVu && employeeInfo.errors.heSoChucVu && (
+                {showValidationErrors && employeeInfo.errors.heSoChucVu && (
                   <p className="text-danger mb-0">{employeeInfo.errors.heSoChucVu}</p>
                 )}
               </div>
@@ -255,27 +257,16 @@ const CreateAndEdit = () => {
                 <label htmlFor="luongCoBan" className="form-label fw-semibold">
                   Lương cơ bản
                 </label>
-                <select
-                  className="form-select"
-                  id="luongCoBan"
-                  name="luongCoBan"
+                <CustomSelect
+                  options={salaryBasicOptions}
                   value={employeeInfo.values.luongCoBan}
-                  onChange={(event) =>
-                    employeeInfo.setFieldValue(
-                      'luongCoBan',
-                      Number(event.target.value),
-                    )
-                  }
-                  onBlur={employeeInfo.handleBlur}
-                >
-                  <option value="">Chọn lương cơ bản</option>
-                  {salaryBasicOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-                {employeeInfo.touched.luongCoBan && employeeInfo.errors.luongCoBan && (
+                  onValueChange={(value) => {
+                    employeeInfo.setFieldValue('luongCoBan', value)
+                    employeeInfo.setFieldTouched('luongCoBan', true)
+                  }}
+                  placeholder="Chọn lương cơ bản"
+                />
+                {showValidationErrors && employeeInfo.errors.luongCoBan && (
                   <p className="text-danger mb-0">{employeeInfo.errors.luongCoBan}</p>
                 )}
               </div>
@@ -301,7 +292,7 @@ const CreateAndEdit = () => {
                   />
                   <span className="input-group-text">giờ</span>
                 </div>
-                {employeeInfo.touched.soGioLamTrongThang && employeeInfo.errors.soGioLamTrongThang && (
+                {showValidationErrors && employeeInfo.errors.soGioLamTrongThang && (
                   <p className="text-danger mb-0">{employeeInfo.errors.soGioLamTrongThang}</p>
                 )}
               </div>
